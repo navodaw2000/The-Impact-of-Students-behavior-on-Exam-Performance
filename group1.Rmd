@@ -1,0 +1,611 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+#Import the Data set into R
+data<-read.csv("C:/Users/Kaveesha/Desktop/project/student_habits_performance.csv")
+head(data)
+```
+```{r}
+# check the missing values
+missing_value<-sum(is.na(data))
+missing_value
+```
+There is no missing values in the dataset.
+
+```{r}
+# consider the column names of data frame
+colnames(data)
+
+```
+The are 16 Columns in the dataset.
+
+```{r}
+#Check the type of the variables
+str(data)
+```
+Here we can see the structure of each variables.
+
+```{r}
+# Remove the student id from data set
+data$student_id<- NULL 
+head(data)
+```
+
+```{r}
+# Convert the variables to suitable types
+data$gender <- as.factor(data$gender)
+data$part_time_job <- as.factor(data$part_time_job)
+data$diet_quality <- as.factor(data$diet_quality)
+data$parental_education_level <- as.factor(data$parental_education_level)
+data$internet_quality <- as.factor(data$internet_quality)
+data$extracurricular_participation<- as.factor(data$extracurricular_participation)
+data$age <- as.numeric(data$age)
+data$exercise_frequency <- as.numeric(data$exercise_frequency)
+data$mental_health_rating <- as.numeric(data$mental_health_rating)
+```
+
+```{r}
+#Get summary of the dataset
+summary(data)
+```
+We can see here the minimum, maximum values of each variables and also median, mean,1st and 3rd quarters values of each variables.
+
+install.packages("psych")
+```{r}
+#describe the data
+library(psych)
+describe(data)
+boxplot(data)
+```
+
+
+```{r}
+library(dplyr) 
+# Check correlation between numeric variables 
+numeric_vars <- data %>% select_if(is.numeric) 
+cor_matrix <- cor(numeric_vars) 
+print(cor_matrix) 
+
+library(ggplot2) 
+library(GGally)
+ggcorr(numeric_vars, label = TRUE, label_size = 3, size = 2.5) 
+```
+
+```{r}
+#Separating numerical (continuous/discrete) data
+ v <-c(15,1,3,4,5,7,8,10,13) 
+pairs(data[,v])
+
+```
+
+
+
+```{r}
+#Collinearity of quantitative variables
+pairs(data[,-v]) 
+```
+
+Scatter plots are no use in detecting the relationship between two categorical variables or categorical and numerical variables.
+
+
+```{r}
+# Replace 'data' with your actual data frame name
+numeric_cols <- names(data)[sapply(data,is.numeric)]
+
+# Loop through each numeric variable and create a boxplot with outlier info
+for (col in numeric_cols) {
+  outliers <- boxplot.stats(data[[col]])$out
+  boxplot(data[[col]],
+          main = paste("Box plot for", col),
+          ylab = col,
+          sub = paste("Outliers:", paste(outliers, collapse = ", "))
+  )
+}
+```
+
+#this outliears are not real world outliears so we did not remove the outliears
+
+```{r}
+model_a<-lm(exam_score~age,data=data)
+summary(model_a)
+```
+
+```{r}
+model_b<-lm(exam_score~study_hours_per_day,data=data)
+summary(model_a)
+```
+
+```{r}
+model_c<-lm(exam_score~social_media_hours,data=data)
+summary(model_a)
+```
+
+```{r}
+model_d<-lm(exam_score~netflix_hours,data=data)
+summary(model_a)
+```
+
+```{r}
+model_e<-lm(exam_score~attendance_percentage,data=data)
+summary(model_a) 
+```
+
+```{r}
+model_f<-lm(exam_score~sleep_hours,data=data)
+summary(model_a)
+```
+
+```{r}
+model_g<-lm(exam_score~exercise_frequency,data=data)
+summary(model_a)
+```
+
+```{r}
+model_h<-lm(exam_score~mental_health_rating,data=data)
+summary(model_a)
+```
+
+
+```{r}
+# Plots of quantitative variables
+#Investigate the difference in exam_score between Female, Male, and Other
+ boxplot(data$exam_score ~ data$gender,main = "Box plot for the gender")
+```
+
+This Box plot represents compare exam scores across three different gender categories: Female, Male, and Other.The median exam score for females is around 75.
+
+```{r}
+data.gender.lm<-lm(exam_score ~ gender,data=data)
+summary(data.gender.lm)
+```
+```{r}
+contrasts(data$gender)
+```
+
+
+```{r}
+#Boxplot between exam_score and part_time_job
+boxplot(data$exam_score ~ data$part_time_job,main = "Box plot for the part time job")
+```
+
+This box plot shows that compare exam scores for individuals with and without part-time jobs.The middle 50% of scores ranges from approximately 65 to 85 for without part time job. Individuals without part-time jobs tend to have slightly higher median exam scores compared to those with part-time jobs.
+
+```{r}
+data.part.t.j.lm<-lm(exam_score ~part_time_job ,data=data)
+summary(data.part.t.j.lm)
+```
+```{r}
+contrasts(data$part_time_job)
+```
+
+
+```{r}
+#Boxplot between exam_score and diet_quality
+boxplot(data$exam_score ~ data$diet_quality,main = "box plot for the diet quality")
+```
+
+his plots used to compare exam scores across three different diet quality categories: Fair, Good, and Poor. The y-axis represents the exam scores ranging from 20 to 100, while the x-axis represents the diet quality categories.It indicates that students with a Good diet quality tend to have higher median exam scores compared to those with Fair or Poor diet quality.
+
+
+```{r}
+data.diet.lm<-lm(exam_score ~ diet_quality,data=data)
+summary(data.diet.lm)
+```
+
+```{r}
+contrasts(data$diet_quality)
+```
+
+
+```{r}
+#Boxplot between exam_score and parental_education_level
+boxplot(data$exam_score ~ data$parental_education_level,main = "box plot for the parental_education level") 
+```
+
+This boxplot displays the distribution of exam scores grouped by parental education level (Bachelor,High school, Master, None).All three groups (Bachelor,High school, Master, None) have similar median scores (around 70).No clear upward or downward trend in medians based on education level.The height of each box (IQR) is quite similar across groups, suggesting comparable score variability.Parental education level does not show a significant visual impact on students' exam performance in this dataset.
+This suggests that students’ scores are relatively independent of whether their parents have Bachelor, Master, or no formal education.
+
+
+```{r}
+data.edu.lm<-lm(exam_score ~ parental_education_level,data=data)
+summary(data.edu.lm)
+```
+
+```{r}
+contrasts(data$parental_education_level)
+```
+
+```{r}
+#Boxplot between exam_score and internet_quality
+boxplot(data$exam_score ~ data$internet_quality,main = "box plot for the internet_quality")
+```
+This boxplot shows the distribution of students' exam scores grouped by their reported internet quality: Average, Good, and Poor.All three groups (Average, Good, Poor) have similar medians, around 70.Slightly higher median for students with Average internet.The spread (height of the box) is nearly the same for all groups, suggesting similar variability in scores across internet types.All groups span a wide range (~25 to 100), indicating that both low and high performers exist in all internet quality categories.Internet quality does not appear to have a strong effect on exam performance in this dataset.The presence of high and low scores across all internet types suggests students adapt to their circumstances.While better internet might help with studying, it’s not a decisive factor in predicting exam results here.
+
+
+```{r}
+data.int.lm<-lm(exam_score ~ internet_quality,data=data)
+summary(data.int.lm)
+```
+
+```{r}
+contrasts(data$internet_quality)
+```
+
+```{r}
+#Boxplot between exam_score and extracurricular_participation
+boxplot(data$exam_score ~ data$extracurricular_participation,main = "box plot for the cricular_participation")
+```
+
+This boxplot shows the distribution of student's exam score grouped by their extra curricular participation.The values range from 20 to 100, with increments of 20 (20, 40, 60, 80, 100).The labels "No" and "Yes" indicate this is a categorical variable, likely representing whether students participated in extracurricular activities (binary: Yes/No).Both "Yes" and "No" groups have similar score distributions.Participating in extracurricular activities does not show a strong relationship with exam performance.
+
+
+```{r}
+data.ext.lm<-lm(exam_score ~ extracurricular_participation,data=data)
+summary(data.ext.lm)
+```
+
+```{r}
+contrasts(data$extracurricular_participation)
+```
+
+
+```{r}
+# Fit the model 
+model<-lm(exam_score~.,data = data)
+summary(model)
+```
+There are some significant and insignificant predictor variables.The adjusted R-squared value is 0.8999.
+
+
+install.packages("car")
+```{r}
+# check the multicollinearity
+
+library(car)
+vif(model)
+```
+
+We can say that there are no predictor variables highly correlated with each others.
+
+```{r}
+#As data frame
+vif_values <- vif(model)
+vif_values <- as.data.frame(vif_values)
+vif_values
+```
+
+
+All of vif values are less than 5 so we can conclude that it has not multicollinearity.
+
+
+#----Using Best Subset Selection/ All Possible Regressions----
+```{r}
+library(leaps)
+model_1 <- regsubsets(exam_score~ ., data = data, nvmax = 19) 
+summary(model_1) 
+```
+
+
+```{r}
+par(mfrow = c(1,2)) 
+plot(summary(model_1)$rss, xlab = "Number of Variables", ylab = "RSS", type = 
+"l") 
+RSS_min <- which.min(summary(model_1)$rss)
+points(RSS_min,summary(model_1)$rss[RSS_min], col = "blue", cex = 2, pch = 20) 
+abline(v =RSS_min) 
+plot(summary(model_1)$adjr2, xlab = "Number of Variables", ylab = "Adjusted 
+RSq", type = "l") 
+adjr2_max <- which.max(summary(model_1)$adjr2)  
+points(adjr2_max, summary(model_1)$adjr2[adjr2_max], col = "red", cex = 2, pch  
+= 20) 
+abline(v=adjr2_max)
+```
+
+```{r}
+par(mfrow = c(1,2)) 
+plot(summary(model_1)$cp, xlab = "Number of Variables", ylab = "Cp", type = 
+"l")  
+cp_min <- which.min(summary(model_1)$cp) 
+points(cp_min, summary(model_1)$cp[cp_min], col = "green", cex = 2, pch = 20)  
+plot(summary(model_1)$bic, xlab = "Number of Variables", ylab = "BIC", type = 
+"l") 
+bic_min <- which.min(summary(model_1)$bic) 
+points(bic_min, summary(model_1)$bic[bic_min], col = "purple", cex = 2, pch = 20)
+```
+
+
+
+```{r}
+#Create a data frame including all the crieterion values for all the models
+res.sum <- summary(model_1) 
+criterion <- data.frame( 
+  model = 1:19, 
+  Adj.R2 = (res.sum$adjr2), 
+  CP = (res.sum$cp), 
+  BIC = (res.sum$bic), 
+  RSS = res.sum$rss  
+) 
+criterion 
+```
+
+```{r}
+cp_min <- which.min(summary(model_1)$cp) 
+cp_min
+bic_min <- which.min(summary(model_1)$bic)
+bic_min
+adjr2_max <- which.max(summary(model_1)$adjr2) 
+adjr2_max 
+```
+#for model 7(bic min)
+```{r}
+coef(model_1, 7)
+```
+
+```{r}
+ mod_7<- lm(exam_score~study_hours_per_day+social_media_hours+netflix_hours+attendance_percentage+sleep_hours+exercise_frequency+mental_health_rating ,data=data) 
+summary(mod_7)
+```
+
+#for model 8(cp min)
+```{r}
+coef(model_1, 8)
+```
+
+```{r}
+mod_8 <- 
+lm(exam_score~study_hours_per_day+social_media_hours+netflix_hours+attendance_percentage+sleep_hours+diet_quality+exercise_frequency+mental_health_rating ,data=data) 
+summary(mod_8)
+```
+
+#for adj r2 max
+```{r}
+coef(model_1, 9)
+```
+
+```{r}
+mod_9 <- 
+lm(exam_score~study_hours_per_day+social_media_hours+netflix_hours+attendance_percentage+sleep_hours+diet_quality+exercise_frequency+internet_quality+mental_health_rating ,data=data) 
+summary(mod_9)
+```
+```{r}
+#Compare R-squared
+summary(mod_7)$adj.r.squared
+summary(mod_8)$adj.r.squared
+summary(mod_9)$adj.r.squared
+```
+```{r}
+AIC(mod_7,mod_8,mod_9)
+```
+
+```{r}
+BIC(mod_7,mod_8,mod_9)
+```
+#best 
+```{r}
+final_best<-lm(exam_score~study_hours_per_day+social_media_hours+netflix_hours+attendance_percentage+sleep_hours+exercise_frequency+mental_health_rating ,data=data) 
+summary(final_best)
+```
+
+
+
+install.packages("leaps")
+# ---selecting best model by using forward elimination procedure---
+```{r}
+library(leaps)
+model_2 <- regsubsets(exam_score ~. ,data = data,nvmax=19,method = "forward")
+summary(model_2)
+```
+
+```{r}
+#Create a data frame including all the crieterion values for all the models
+res.sum <- summary(model_2) 
+criterion_2 <- data.frame( 
+  model = 1:19, 
+  Adj.R2 = (res.sum$adjr2), 
+  CP = (res.sum$cp), 
+  BIC = (res.sum$bic), 
+  RSS = res.sum$rss  
+) 
+criterion_2 
+```
+
+```{r}
+library(ggplot2)
+ggplot(criterion_2, aes(model)) + 
+geom_line(aes(y = Adj.R2, colour = "Adj.R2")) + 
+geom_line(aes(y= CP, colour = "Cp")) + 
+geom_line(aes(y=BIC, colour = "BIC")) + 
+geom_line(aes(y= RSS, colour = "RSS"))
+```
+
+```{r}
+#Since they are in different ranges it’s better to standardize them.
+#use scale function without the model no  
+#re-combine the model number using cbind
+criterion_std <- cbind(model= criterion$model, scale(criterion[,-1])) 
+criterion_std <- as.data.frame(criterion_std) 
+criterion_std
+```
+```{r}
+library(ggplot2) 
+ggplot(criterion_std, aes(model)) + 
+geom_line(aes(y = Adj.R2, colour = "Adj.R2")) + 
+geom_line(aes(y= CP, colour = "Cp")) + 
+geom_line(aes(y=BIC, colour = "BIC")) + 
+geom_line(aes(y= RSS, colour = "RSS"))
+```
+
+from this plot we get model 7
+```{r}
+coef(model_2, 7)
+```
+```{r}
+better_model_fwd <- 
+lm(exam_score~study_hours_per_day+social_media_hours+netflix_hours+attendance_percentage+sleep_hours+exercise_frequency+mental_health_rating ,data=data) 
+summary(better_model_fwd)
+```
+```{r}
+vif(better_model_fwd)
+```
+
+There fore in the forward selection procedure also gives the best model has not multicollinearity.Because of all vif values are lessthan 5.
+
+
+
+```{r}
+#Residual plots
+par(mfrow = c(2,2)) 
+plot(better_model_fwd)
+```
+
+```{r}
+# Q-Q Plot 
+ plot(better_model_fwd, which = 2)  
+```
+
+```{r}
+# check Normality Assumption 
+shapiro.test(residuals(better_model_fwd))
+```
+```{r}
+# Residuals vs Fitted 
+plot(better_model_fwd, which = 1) 
+```
+
+
+```{r}
+# Check residuals are uncorrelated 
+#Residual vs Rund order/observation order/Time plot 
+plot(residuals(better_model_fwd), 
+xlab = "Observation Order", 
+ylab = "Residuals", 
+main = "Residuals vs Rund order/observation order/Time plot") 
+abline(h = 0, col = "red") 
+```
+
+
+```{r}
+coef(better_model_fwd)
+```
+
+By the forward selection procedure
+Effect Model-:
+ Y(exam_score) = 6.1572193 + 9.5745576*(study_hours_per_day)  -2.6197830*(social_media_hours) -2.2770773 *(netflix_hours) + 0.1447283*(attendance_percentage) + 2.0046195*(sleep_hours) + 1.4518742*(exercise_frequency) +1.9489111*(mental_health_rating)
+
+      There fore we can say that both stepwise and forward selection methods the change in the examscore when a one unit increases or decreases above these predictors.
+      
+01)study_hours_per_day(9.5745576)
+      For every additional hour spent per day, the exam score increases by 9.5745576 points, assuming all other variables are held constant.This is the strongest predictor of exam scores in this model.
+      
+02)social_media_hours(-2.6197830)
+      For additional hour spent on social media, the exam score decreases by 2.6197830 points,holding other variables constant.Note the negative effect that mean more social media use is associated with lower exam scores.
+      
+03)netflix_hours( -2.2770773)
+      For every additional hour spent watching Netflix, the exam score decreases by  2.2770773 points,holding other variables constant.Similar to social media, leisure screen time has a negative impact.
+      
+04)attendance_percentage(0.1447283)
+      For every 1% increase in attendance, the exam score increases by0.1447283 points,holding the other variables constant.While positive,the effect is small compared to other predictors.
+      
+05)sleep_hours(2.0046195)
+      For every additional unit hour of sleep per night,the exam score increases by 2.0046195points,holding other variables constant. Adequate sleep is important for performance.
+      
+(06)exercise_frequency(1.4518742)
+      For every additional unit increase in exercise frequency(ex:from"rarely" to "sometimes"), the exam score increases by 1.4518742 points,holding other variables constant. Regular exercise may reduce stress.
+      
+(07)mental_health_rating(1.9489111)
+      For every one unit improvement in mental health rating , the exam score increases by 1.9489111 points,holding other variables are constant.Better mental health is associated with higher scores.
+
+
+The strongest positive predictor:-study_hours_per_day(9.5745576)
+The strongest negative predictors:-social_media_hours(-2.6197830) and netflix_hours( -2.2770773) 
+
+#--- stepwise model selection---
+install.packages("MASS")
+```{r}
+# Selecting the best model for the data set using stepwise model selection
+library(MASS)
+
+model_step <- lm(exam_score~., data = data) 
+step_model <- stepAIC(model_step, direction = "both", trace = TRUE)
+```
+fitted model is exam_score =study_hours_per_day + social_media_hours + netflix_hours+attendance_percentage + sleep_hours + exercise_frequency + mental_health_rating
+
+
+Effect Model-:
+ Y(exam_score) = 6.15722 + 9.57456*(study_hours_per_day) - 2.61978*(social_media_hours) - 2.27708*(netflix_hours) + 0.14473*(attendance_percentage) + 2.00462*(sleep_hours) + 1.45187*(exercise_frequency) + 1.94891*(mental_health_rating)
+
+
+```{r}
+# Summarized the model
+summary(step_model)
+```
+
+Study hours per day have the strongest positive impact on exam performance. For each additional hour of studying, scores increase by approximately 9.58 points.Social media use and Netflix watching negatively affect exam scores, indicating that excessive screen time may hinder academic performance.Positive lifestyle habits—such as higher attendance, more sleep, regular exercise, and better mental health—are all significantly associated with higher exam scores.All predictors in the model are statistically significant (p < 0.001), suggesting that the relationships observed are highly unlikely to be due to chance.
+
+Overall, students who prioritize studying, maintain good health habits, and limit screen time tend to perform better academically. This model can be useful for identifying areas where students might improve their habits to achieve better academic outcomes.Multiple R-squared is 0.9011 which is approximate to 1 so we can say that it is suitable model for data set.
+
+
+```{r}
+step_model
+```
+
+```{r}
+#check the multicollinearity in fitted model
+vif(step_model)
+```
+
+```{r}
+# Model diagnostics
+par(mfrow=c(2,2))
+plot(step_model)
+```
+
+The diagnostic plots of the final regression model generally support the validity of the linear regression assumptions:
+
+1. Linearity & Homoscedasticity:
+The Residuals vs Fitted and Scale-Location plots indicate a mild curvature and slight heteroscedasticity, suggesting that the relationship may not be perfectly linear across all predictor levels. However, the deviations are not severe and the model remains interpretable.
+
+2. Normality of Residuals:
+The Q-Q plot shows that residuals are approximately normally distributed, validating the use of inferential statistics.
+
+3. Influential Observations:
+The Residuals vs Leverage plot reveals a few observations with relatively high leverage and Cook’s distance. These points may slightly influence the model but do not appear to dominate or distort results significantly.
+
+Conclusion:
+The model meets core assumptions reasonably well. While slight non-linearity and mild heteroscedasticity are present, they are not substantial enough to invalidate the analysis. The model is robust, with only minor influence from outliers.
+
+##stepwise method
+install.packages("ggplot2")
+```{r}
+library(ggplot2)
+# Extract the data used in the model
+model_data <- step_model$model
+
+# Get names of numeric columns
+numeric_cols <- names(model_data)[sapply(model_data, is.numeric)]
+
+# Loop through each numeric variable and plot histogram
+for (col in numeric_cols) {
+  print(
+    ggplot(model_data, aes_string(x = col)) +
+      geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+      labs(title = paste("Histogram of", col), x = col, y = "Frequency")
+  )
+}
+```
+
+#boxplot of significant variables#
+```{r}
+boxplot(data$exam_score~data$study_hours_per_day)
+boxplot(data$exam_score~data$social_media_hours)
+boxplot(data$exam_score~data$netflix_hours)
+boxplot(data$exam_score~data$attendance_percentage)
+boxplot(data$exam_score~data$sleep_hours)
+boxplot(data$exam_score~data$exercise_frequency)
+boxplot(data$exam_score~data$mental_health_rating)
+```
+
